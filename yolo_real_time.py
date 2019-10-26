@@ -1,5 +1,5 @@
-# python yolo_real_time.py --output output/airport.avi for saving the live video to a file
-# python yolo_real_time.py for live stream
+# python yolo_real_time.py
+# python yolo_real_time.py --output output/airport.avi (for saving the live video to a file)
 
 from webcam import Webcam
 import numpy as np
@@ -8,7 +8,7 @@ import time
 import cv2
 import os
 
-MIN_CONFIDENCE = 0.5	# minimum confidence needed when filtering out detections
+MIN_CONFIDENCE = 0.1	# minimum confidence needed when filtering out detections
 THRESHOLD = 0.3			# non-maxima suppression threshold
 LABELS = open("yolo-coco/coco.names").read().strip().split("\n") # load COCO class labels that YOLO model was trained on
 COLORS = np.random.randint(0, 255, size=(len(LABELS), 3), dtype="uint8")
@@ -32,18 +32,21 @@ ln = net.getLayerNames()
 ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
 
-print("[INFO] starting video capture...")
 (W, H) = (None, None)
+canvas = None
+
+print("[INFO] starting video capture...")
 webcam = Webcam()
 webcam.start()
-
+time.sleep(2)
 
 while True:
 	frame = webcam.get_current_frame()
-	# frame = cv2.resize(frame, (640, 360))
+	frame = cv2.resize(frame, (640, 360))
 
 	if W is None or H is None:
 		(H, W) = frame.shape[:2]
+		canvas = 255 * np.ones(shape=[H, W, 3], dtype=np.uint8)
 
 	# construct a blob from the input frame and then perform a forward pass of the YOLO object detector,
 	# giving us our bounding boxes and associated probabilities
@@ -61,6 +64,8 @@ while True:
 			# extract the class ID and confidence (i.e., probability) of the current object detection
 			scores = detection[5:]
 			classID = np.argmax(scores)
+			if LABELS[classID] != "toothbrush":
+				continue
 			confidence = scores[classID]
 
 			# filter out weak predictions by ensuring the detected probability is greater than the minimum probability
@@ -82,12 +87,18 @@ while True:
 	# apply non-maxima suppression to suppress weak, overlapping bounding boxes
 	idxs = cv2.dnn.NMSBoxes(boxes, confidences, MIN_CONFIDENCE, THRESHOLD)
 
-	# ensure at least one detection exists
 	if len(idxs) > 0:
 		for i in idxs.flatten():
 			# extract the bounding box coordinates
 			(x, y) = (boxes[i][0], boxes[i][1])
 			(w, h) = (boxes[i][2], boxes[i][3])
+
+			# draw on canvas
+			canvas_startY = int(y + (0.1 * (h)))
+			canvas_endY = int(y + (0.12 * (h)))
+			canvas_startX = int(x + (0.45 * (w)))
+			canvas_endX = int(x + (0.55 * (w)))
+			canvas[canvas_startY: canvas_endY, canvas_startX: canvas_endX] = (0, 0, 255)
 
 			# draw a bounding box rectangle and label on the frame
 			color = [int(c) for c in COLORS[classIDs[i]]]
@@ -99,6 +110,7 @@ while True:
 		writer.write(frame)
 
 	cv2.imshow("Output", frame)
+	cv2.imshow("Canvas", canvas)
 	if cv2.waitKey(1) & 0xFF == ord('q'):
 		break
 
