@@ -1,5 +1,5 @@
-# Paintbrush-Iridescence
-Orchestrate art like never before!
+# Magic-Palette
+Orchestrate art like never before! Wave your wand (in this case, a toothbrush or a bottle) in the air to paint on your digital canvas!
 
 
 
