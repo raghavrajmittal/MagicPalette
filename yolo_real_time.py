@@ -39,6 +39,7 @@ print("[INFO] You're good to draw!")
 while True:
 	# get current frame and image dimensions
 	frame = webcam.get_current_frame()
+	frame = cv2.flip(frame, 1)
 	frame = cv2.resize(frame, (640, 360))
 	if H is None:
 		(H, W) = frame.shape[:2]
