@@ -7,7 +7,7 @@ from keras.preprocessing import image
 from keras.models import model_from_json, load_model
 from playsound import playsound
 from sklearn.metrics import pairwise
-
+import argparse
 # global variables
 MIN_CONFIDENCE = 0.2	# minimum probability to filter weak detections
 prototext_path = "mobileNetSSD/MobileNetSSD_deploy.prototxt.txt" 	# path to Caffe 'deploy' prototxt file
@@ -25,6 +25,13 @@ PALETTE = {	1: {"name": "red", "value": (0,0,255)},
 			5: {"name": "magenta", "value": (255,0,255)}	}
 current_color = 1
 bg = None
+
+# in case video needs to be saved
+ap = argparse.ArgumentParser()
+ap.add_argument("-a", "--artist", default="Raghav",
+	help="name of the person creating the painting")
+args = vars(ap.parse_args())
+
 
 # To find the running average over the background
 def run_avg(image, accumWeight):
@@ -134,6 +141,8 @@ while True:
 	if H is None:
 		(H, W) = frame.shape[:2]
 		canvas = 255 * np.ones(shape=[H, W, 3], dtype=np.uint8)
+		signature = args["artist"] + " - Oct 19"
+		cv2.putText(canvas, signature, (int(W*0.85), (int(H*0.97))), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1)
 		top, right, bottom, left = 0, W - 251, 250, W - 1
 
 
@@ -207,8 +216,9 @@ while True:
 			maxEmotion = mostFrequent(holdingArray)
 			if maxEmotion in ["fear", "sad", "surprise"]:
 				canvas = 255 * np.ones(shape=[H, W, 3], dtype=np.uint8)
+				signature = args["artist"] + " - Oct 19"
+				cv2.putText(canvas, signature, (int(W*0.85), (int(H*0.97))), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1)
 			elif maxEmotion == "happy":
-				cv2.putText(canvas, "Raghav - Oct '19", (int(W*0.85), (int(H*0.97))), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1)
 				cv2.imwrite("files/canvas.jpg", canvas)
 				playsound('files/camera-click.wav')
 				holdingArray = []

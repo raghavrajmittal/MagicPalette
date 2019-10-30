@@ -19,10 +19,12 @@ ln = net.getLayerNames() # determine *output* layer names of the YOLO object det
 ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
 
-# in case video needs to be saved
+# optional arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-o", "--output", default=False,
 	help="path to output video")
+ap.add_argument("-a", "--artist", default="Raghav",
+	help="name of the person creating the painting")
 args = vars(ap.parse_args())
 if args["output"] is not False:
 	fourcc = cv2.VideoWriter_fourcc(*"MJPG")
@@ -44,6 +46,9 @@ while True:
 	if H is None:
 		(H, W) = frame.shape[:2]
 		canvas = 255 * np.ones(shape=[H, W, 3], dtype=np.uint8)
+		signature = args["artist"] + " - Oct 19"
+		cv2.putText(canvas, signature, (int(W*0.75), (int(H*0.97))), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1)
+
 
 
 	# construct a blob from the input frame and then perform a forward pass of the YOLO object detector
