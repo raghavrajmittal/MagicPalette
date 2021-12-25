@@ -4,6 +4,10 @@ Orchestrate art like never before! Wave your wand (in this case, a toothbrush or
 
 When running the mobileNet SSD for object detection, run real_time_object_detection.py and move a wine bottle as your magic wand to draw something out. When Running YOLO for object detection, run yolo_real_time.py and move a toothbrush as your magic wand to draw something!
 
+To Run:
+```
+python yolo_real_time.py
+```
 
 Credits/References:<br/>
 https://www.pyimagesearch.com/2018/11/12/yolo-object-detection-with-opencv/<br/>
